@@ -9,7 +9,7 @@
 
     <!-- 卡片视图区 -->
     <el-card>
-      <!-- 2、为ECharts准备一个具备大小（宽高）的Dom -->
+      <!-- 2、为ECharts准备一个具备大小（宽高）的 DOM -->
       <div id="main" style="width: 600px;height:400px;"></div>
     </el-card>
   </div>

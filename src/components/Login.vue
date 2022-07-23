@@ -136,7 +136,7 @@ export default {
   bottom: 0;
   width: 400px;
   margin: 0 20px;
-  //内容跟带上border+padding一共这么宽。默认是内容就这么宽
+  //内容跟带上 border+padding 一共这么宽。默认是内容就这么宽
   box-sizing: border-box;
 }
 

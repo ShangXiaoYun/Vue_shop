@@ -11,7 +11,7 @@
     <el-card>
       <el-row :gutter="20">
         <el-col :span="8">
-          <!-- 搜索文本输入框  搜索：后台做的模糊匹配-->
+          <!-- 搜索文本输入框 -->
           <el-input
             placeholder="请输入内容"
             v-model="queryInfo.query"
@@ -123,6 +123,11 @@
           <el-input v-model="editForm.goods_number"></el-input>
         </el-form-item>
         <el-form-item label="商品分类" prop="goods_cat">
+          <span v-for="(item,i) in selectedCate" :key="i">
+            <el-tag>{{item}}</el-tag>
+            <i v-if="i !== selectedCate.length - 1" class="el-icon-caret-right"></i>
+          </span> 
+          <br/>
           <!-- 级联选择器 -->
           <el-cascader
             v-model="selectedKeys"
@@ -138,31 +143,9 @@
         <el-form-item label="静态属性">
           <el-input v-model="onlyTableAttr" disabled></el-input>
         </el-form-item>
-        <!-- <el-form-item label="商品简介：" prop="goods_introduce">
-            <span  v-html="editForm.goods_introduce" />
-        </el-form-item> -->
         <el-form-item label="浮动价格">
           <el-input v-model="addPrice"></el-input>
         </el-form-item>
-        <!-- 不可修改部分:移至详情栏 -->
-        <!-- <el-form-item label="商品状态" prop="goods_state">
-          <el-checkbox-group v-model="checkboxState">
-            <el-checkbox label="0" disabled>未通过</el-checkbox>
-            <el-checkbox label="1" disabled>审核中</el-checkbox>
-            <el-checkbox label="2" disabled>已审核</el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item label="是否为热销品" prop="is_promote">
-          <el-switch
-            v-model="editForm.is_promote"
-            disabled
-            active-color="#13ce66"
-            inactive-color="#ff4949">
-          </el-switch>
-        </el-form-item>
-        <el-form-item label="热销品数量" prop="hot_mumber">
-          <el-input v-model="editForm.hot_mumber" disabled></el-input>
-        </el-form-item> -->
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="editDialogVisible = false">取 消</el-button>
@@ -249,7 +232,7 @@
 </template>
 
 <script>
-import {debounce} from '../common/common'
+// import {debounce} from '../common/common'
 export default {
   data() {
     return {
@@ -266,9 +249,7 @@ export default {
       //控制修改商品对话框的显示与隐藏
       editDialogVisible: false,
       //修改商品信息表单
-      editForm: {
-        
-      },
+      editForm: {},
       //修改商品信息表单的校验规则对象
       editFormRules: {
         goods_name: [
@@ -297,8 +278,6 @@ export default {
       },
       //级联选择器选中项的Id组合
       selectedKeys: [],
-      //复选框选中的组合
-      checkboxState:[],
       //动态参数数组
       manyTable:[],
       //静态属性数组
@@ -317,11 +296,16 @@ export default {
       urls:[],
       //选中的分类
       selectedCates:'',
-      selectedCate:[]
+      selectedCate:[],
+      selectedCate1:'',
+      selectedCate2:'',
+      selectedCate3:''
+
     }
   },
   created() {
     this.getGoodsList()
+    this.getCateList()
   },
   methods: {
     //根据分页获取对应的商品列表
@@ -367,10 +351,8 @@ export default {
     },
     //点击编辑按钮，弹出编辑对话框
     async editDialog(id) {
-      this.getCateList()
       this.editDialogVisible = true
       const { data: res } = await this.$http.get(`goods/${id}`)
-      // console.log(res)
       if (res.meta.status !== 200)
         return this.$message.error('获取商品信息失败！')
       this.$message.success('获取商品成功！')
@@ -378,8 +360,20 @@ export default {
       console.log(this.editForm)
       this.selectedKeys = this.editForm.goods_cat.split(',')
       console.log(this.selectedKeys)
-      // this.checkboxState.push(this.editForm.goods_state + '')
-      // console.log(this.checkboxState)
+      for(let i = 0; i < this.selectedKeys.length; i++){
+        const {data:res} = await this.$http.get(`categories/${this.selectedKeys[i]}`)
+        if(i === 0){
+          this.selectedCate1 = res.data.cat_name
+        }
+        if(i === 1){
+          this.selectedCate2 = res.data.cat_name
+        }
+        if(i === 2){
+          this.selectedCate3 = res.data.cat_name
+        }
+      }
+      this.selectedCate = [this.selectedCate1,this.selectedCate2,this.selectedCate3]
+      console.log(this.selectedCate);
       //分别把静态属性和动态参数拼起来
       console.log(res.data.attrs);
       if(res.data.attrs.length !== 0) {
@@ -400,15 +394,10 @@ export default {
         console.log(this.manyTableAttr)
         console.log(this.manyTableAttr)
       }
-      
-      // console.log(typeof this.editForm.goods_introduce);
-      // this.editForm.goods_introduce = this.editForm.goods_introduce.match(/\<p\>(\S*)\<p\>/)[1]
-      // console.log(this.editForm.goods_introduce);
     },
     editDialogClosed() {
       //重置表单
       this.$refs.editFormRef.resetFields()
-      this.checkboxState = []
       this.selectedKeys = []
       this.manyTable = []
       this.onlyTable = []
@@ -417,14 +406,16 @@ export default {
       this.manyTableAttr = ''
       this.onlyTableAttr = ''
       this.newAttrs = []
+      this.selectedCate = []
+      this.selectedCate1 = ''
+      this.selectedCate2 = ''
+      this.selectedCate3 = ''
     },
     editInfo() {
       //提交修改前，进行预校验
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return this.$message.error('修改商品信息失败！')
         //处理attrs 处理成数组,数组中包含对象(不能修改，因为需要提供attr_id)
-        // console.log(this.onlyTableAttr)
-        // console.log(this.manyTableAttr)
         console.log(this.onlyTable);
         console.log(this.manyTable);
         // if(this.onlyTableAttr) newAttr.push({attr_value:this.onlyTable,attr_sel: "only",add_price:this.addPrice})
@@ -439,6 +430,8 @@ export default {
             this.newAttrs.push({attr_id:items[1],attr_value:items[0],attr_sel: "only",add_price:this.addPrice})
           })
         }
+        // console.log(this.selectedCate);
+        console.log(this.selectedKeys);
         const { data: res } = await this.$http.put(
           `goods/${this.editForm.goods_id}`,
           {
@@ -465,46 +458,64 @@ export default {
         return this.$message.error('获取商品分类失败！')
       this.catelist = res.data
     },
+    // debounce(fn, delay) {
+    //   // 记录上一次的延时器
+    //   var timer = null;
+    //   return function(...args) {
+    //       // 清除上一次延时器
+    //       if(timer) clearTimeout(timer)
+    //       timer = setTimeout(function() {
+    //       fn.apply(this,args)
+    //       }, delay);
+    //   }
+    // },
     //查看商品详情页
     async showDetails(id){
-      this.getCateList()
       const { data: res } = await this.$http.get(`goods/${id}`)
       if (res.meta.status !== 200)
         return this.$message.error('获取商品信息失败！')
-      this.$message.success('获取商品成功！')
       this.detailForm = res.data
       console.log(this.detailForm);
       this.detailForm.pics.forEach(items => {
         this.urls.push(items.pics_big_url)
       })
       this.selectedKeys = this.detailForm.goods_cat.split(',')
-      this.selectedKeys.forEach(async items => {
-        const {data:res} = await this.$http.get(`categories/${items}`)
-        this.selectedCate.push(res.data.cat_name)
-      })
-      //分别把静态属性和动态参数拼起来
-      console.log(res.data.attrs);
-      if(res.data.attrs.length !== 0) {
-        res.data.attrs.forEach(items => {
-          //静态属性(没必要保留id)
-          if(items.attr_sel === 'only'){
-              this.onlyAttrs.push(items.attr_value)
-          }else if(items.attr_sel === 'many'){
-              this.onlyAttrs.push(items.attr_value)
-          }
-        })
+      for(let i = 0; i < this.selectedKeys.length; i++){
+        const {data:res} = await this.$http.get(`categories/${this.selectedKeys[i]}`)
+        if(i === 0){
+          this.selectedCate1 = res.data.cat_name
+        }
+        if(i === 1){
+          this.selectedCate2 = res.data.cat_name
+        }
+        if(i === 2){
+          this.selectedCate3 = res.data.cat_name
+        }
       }
-      console.log(this.onlyAttrs);
-      console.log(this.manyAttrs);
-      console.log('----------------------');
-      // this.addPrice = res.data.attrs[0].add_price
-      this.detailVisible = true
+      this.selectedCate = [this.selectedCate1,this.selectedCate2,this.selectedCate3]
+        console.log(this.selectedCate);
+        //分别把静态属性和动态参数拼起来
+        // console.log(res.data.attrs);
+        if(res.data.attrs.length !== 0) {
+          res.data.attrs.forEach(items => {
+            //静态属性(没必要保留id)
+            if(items.attr_sel === 'only'){
+                this.onlyAttrs.push(items.attr_value)
+            }else if(items.attr_sel === 'many'){
+                this.onlyAttrs.push(items.attr_value)
+            }
+          })
+        }
+        this.detailVisible = true   
     },
     //监听抽屉关闭事件
     handleClose(){
       this.$refs.detailFormRef.resetFields()
       this.urls = []
       this.selectedCate = []
+      this.selectedCate1 = ''
+      this.selectedCate2 = ''
+      this.selectedCate3 = ''
       this.onlyAttrs = []
       this.manyAttrs = []
       this.selectedKeys = []

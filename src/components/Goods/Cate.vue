@@ -82,9 +82,6 @@
         </template>
       </tree-table>
 
-      <!-- 
-          分页区域 :使用了size-change和current-change事件来处理页码大小和当前页变动时候触发的事件。
-      -->
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -125,11 +122,9 @@
             value	指定选项的值为选项对象的某个属性值
             label	指定选项标签为选项对象的某个属性值
             children	指定选项的子选项为选项对象的某个属性值
-
             v-model 将选中的值双向绑定到data中，v-model必须绑定一个数组，
             不能是一个值或者对象，在本例中，级联选择器可以选择一级和二级两项，
             那么需要把两个id值都存起来，因此需要保存到数组中
-
             @change 只要级联选择器的选中项发生变化，就会立即触发事件
            -->
           <el-cascader
@@ -325,7 +320,6 @@ export default {
     },
     //点击按钮，添加新的分类
     addCate() {
-      // console.log(this.addCateForm)
       this.$refs.addCateFormRef.validate(async valid => {
         if (!valid) return
         const { data: res } = await this.$http.post(
@@ -394,7 +388,6 @@ export default {
           type: 'warning'
         }
       ).catch(err => err)
-      console.log(confirmResult)
       if (confirmResult !== 'confirm') return this.$message.info('已取消删除')
       //发起删除请求
       const { data: res } = await this.$http.delete('categories/' + id)

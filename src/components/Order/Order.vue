@@ -21,14 +21,10 @@
       <el-table :data="orderlist" border stripe @expand-change="showGoods">
         <!-- 展开列 -->
         <el-table-column type="expand" label="" >
-          <!-- <template slot-scope="scope">
-            {{scope.row}}
-            订单所包含的商品列表
+          <template slot-scope="scope">
             <el-table
               :data="goodslist"
               border
-              :summary-method="getSummaries"
-              show-summary
               style="width: 100%; margin-top: 20px"
             >
               <el-table-column
@@ -40,17 +36,27 @@
               <el-table-column
                 label="商品"
                 prop="goodsPic"
+                width="120"
               >
-                <el-image
-                  v-if="goodsPic !== undefined"
-                  style="width: 100px; height: 100px"
-                  :src="goodsPic"></el-image>
+                <template v-slot="scope">
+                    <img :src="scope.row.goodsPic" alt="" width="90" height="90">
+                </template>
               </el-table-column>
               <el-table-column
-                prop=""
-                label="价格（元）"
+                prop="goodsName"
               >
-                实付价格和商品原价
+              </el-table-column>
+              <el-table-column
+                prop="goods_origin_price"
+                label="进价（元）"
+                width="100"
+              >
+              </el-table-column>
+              <el-table-column
+                prop="goods_price"
+                label="售价（元）"
+                width="100"
+              >
               </el-table-column>
               <el-table-column
                 width="80"
@@ -59,12 +65,12 @@
               </el-table-column>
               <el-table-column
                 width="130"
-                prop="goods_total_price"
+                prop="goods_price_sum"
                 label="实付商品总价（元）"
               >
               </el-table-column>
             </el-table>
-          </template> -->
+          </template>
           <el-card>
             <!-- 经测试不同order包含的商品是一样的。 -->
             <!-- 每一行代表一种商品 -->
@@ -95,6 +101,7 @@
         <el-table-column label="订单价格" prop="order_price"></el-table-column>
         <el-table-column label="是否付款" prop="pay_status">
           <template slot-scope="scope">
+            <pre>{{scope.row}}</pre>
             <el-tag type="success" v-if="scope.row.pay_status === '1'"
               >已付款</el-tag
             >
@@ -169,8 +176,6 @@
         </el-form-item>
         <el-form-item label="支付状态">
           <!-- 
-            由于需要修改，因此这里是单选框
-            注意这里的动态绑定 
               :label=“1”，表示label的值应为数字1
               label=“1”，表示label的值应为字符串1
            -->
@@ -215,7 +220,6 @@
         label-width="100px"
       >
         <el-form-item label="省市区/县" prop="address1">
-          <!-- <el-input v-model="addressForm.address1"></el-input> -->
           <el-cascader
             :options="cityData"
             v-model="addressForm.address1"
@@ -241,7 +245,7 @@
     <el-dialog title="物流进度" :visible.sync="progressVisible" width="50%">
       <!-- 订单详情中发货的订单没有找到其物流单号，因此只能使用测试单号查询物流,
       测试单号为：1106975712662，物流进度以时间轴的形式渲染到对话框中 
-      Timeline组件：
+      Timeline组件
       -->
       <el-timeline>
         <el-timeline-item
@@ -258,6 +262,7 @@
 
 <script>
 import cityData from './city_data2017_element'
+import _ from 'lodash'
 
 export default {
   data() {
@@ -283,7 +288,7 @@ export default {
       //修改地址对话框的表单验证对象
       addressFormRules: {
         address1: [
-          { required: true, message: '请输入选择省市区/县！', trigger: 'blur' }
+          { required: true, message: '请选择省市区/县！', trigger: 'blur' }
         ],
         address2: [
           { required: true, message: '请填写详细地址！', trigger: 'blur' }
@@ -319,7 +324,7 @@ export default {
       },
       //商品列表
       goodslist:[],
-     
+
     }
   },
 
@@ -382,18 +387,18 @@ export default {
     async changeState(id){
       //根据id获取订单信息
       const { data: res } = await this.$http.get(`orders/${id}`)
-      console.log(res)
+      // console.log(res)
       if (res.meta.status !== 200)
         return this.$message.error('获取订单详情失败！')
       this.stateForm = res.data
-      console.log(this.stateForm)
+      // console.log(this.stateForm)
       this.stateVisible = true
     },
     //提交状态修改：订单编号 发货和支付状态在后台写死了
     async editState(){
-      console.log(this.stateForm);
+      // console.log(this.stateForm);
       const {data:res} = await this.$http.put(`orders/${this.stateForm.order_id}`,this.stateForm)
-      console.log(res,'-------')
+      // console.log(res,'-------')
       if(res.meta.status !== 201) return this.$message.error('修改订单失败！') 
       //修改成功则刷新订单
       this.getOrderList()
@@ -428,14 +433,19 @@ export default {
     addressDialogClosed() {
       this.$ref.addressFormRef.resetFields()
       this.orderDetail = {}
+      this.address = ''
+      this.addressForm = {
+        address1: [],
+        address2:''
+      }
     },
     async showProgressBox() {
       const { data: res } = await this.$http.get('/kuaidi/1106975712662')
-      console.log(res)
+      // console.log(res)
       if (res.meta.status !== 200)
         return this.$message.error('获取物流进度失败！')
       this.progressInfo = res.data
-      console.log(this.progressInfo)
+      // console.log(this.progressInfo)
       this.progressVisible = true
     },
     //展示商品
@@ -453,9 +463,10 @@ export default {
       // const {data:res1} = await this.$http.get(`users/${row.user_id}`)
       // console.log(res1); 
       //根据商品id获取商品详情
-      let goods_price_sum ,goodsOriginPrice = 0
+      let goods_price_sum ,goods_origin_price = 0
       let goodsName ,goodsPic= ''
-      this.goodslist.forEach(async item => {
+      let arr = _.cloneDeep(this.goodslist)
+      arr.forEach(async item => {
         goods_price_sum = item.goods_number * item.goods_price
         Object.assign(item,{goods_price_sum:goods_price_sum})
         const {data:res} = await this.$http.get(`goods/${item.goods_id}`)
@@ -463,16 +474,20 @@ export default {
         if(res.meta.status !== 200) return this.$message.error('获取商品信息失败！')
         goodsName = res.data.goods_name 
         Object.assign(item,{goodsName:goodsName})
-        goodsOriginPrice = res.data.goods_price
-        Object.assign(item,{goodsOriginPrice:goodsOriginPrice})
+        goods_origin_price = res.data.goods_price
+        Object.assign(item,{goods_origin_price:goods_origin_price})
         goodsPic = res.data.pics[0].pics_sma_url
         Object.assign(item,{goodsPic:goodsPic})
-        console.log(item,'xxxxxx');
       }) 
-      console.log(this.goodslist,'xxxxxxxxxxxx');
-      console.log(this.goodslist[0].goods_price,this.goodslist[0].goods_price_sum);
-      console.log(this.goodslist[0].goodsName);
-      // console.log(this.goodslist[0].goodsOriginPrice);
+      
+      setTimeout(() => {
+        console.log(arr,'xxxxxxxxxxxx');
+        console.log(arr[0].goods_price,this.goodslist[0].goods_price_sum);
+        console.log(arr[0].goodsName);
+        console.log(arr[0].goods_origin_price);
+        this.goodslist = arr;
+        console.log(this.goodslist);
+      },500)
     }
   }
 }

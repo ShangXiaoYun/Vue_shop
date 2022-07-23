@@ -9,7 +9,10 @@
 
     <!-- 卡片视图区 -->
     <el-card>
-      <!-- 搜索与添加区域 -->
+      <!-- 
+        搜索与添加区域
+        gutter 属性来指定每一栏之间的间隔
+       -->
       <el-row :gutter="20">
         <el-col :span="8">
           <el-input
@@ -304,23 +307,23 @@ export default {
       const { data: res } = await this.$http.get('users', {
         params: this.queryInfo
       })
-        console.log(res)
+      
       if (res.meta.status !== 200)
         return this.$message.error('获取用户列表失败')
       this.userlist = res.data.users
-      console.log(this.userlist)
+      // console.log(this.userlist)
       this.total = res.data.total
-      console.log(this.total)
+      // console.log(this.total)
     },
     //监听 pagesize 改变的事件
     handleSizeChange(newSize) {
-      console.log(newSize)
+      // console.log(newSize)
       this.queryInfo.pagesize = newSize
       this.getUserList()
     },
     //监听 页码值 改变的事件
     handleCurrentChange(newPage) {
-      console.log(newPage)
+      // console.log(newPage)
       this.queryInfo.pagenum = newPage
       this.getUserList()
     },
@@ -336,6 +339,7 @@ export default {
       const { data: res } = await this.$http.put(
         `users/${userinfo.id}/state/${userinfo.mg_state}`
       )
+      // console.log(res);
       if (res.meta.status !== 200) {
         userinfo.mg_state = !userinfo.mg_state
         return this.$message.error('更新用户状态失败！')
@@ -349,11 +353,11 @@ export default {
     //点击按钮，添加新用户
     addUser() {
       this.$refs.addFormRef.validate(async value => {
-        console.log(value)
+        // console.log(value)  //true
         if (!value) return
         //可以发起添加用户的网络请求
         const { data: res } = await this.$http.post('users', this.addForm)
-        console.log(res)
+        // console.log(res)
         if (res.meta.status !== 201) {
           this.$message.error('添加用户失败！')
         }
@@ -369,11 +373,11 @@ export default {
     */
     //展示编辑用户的对话框
     async showEditDialog(id) {
-      console.log(id)
+      // console.log(id)
       this.editDialogVisible = true
       //根据id查询用户信息
       const { data: res } = await this.$http.get('users/' + id)
-      console.log(res)
+      // console.log(res)
       if (res.meta.status !== 200) {
         return this.$message.error('查询用户信息失败')
       }
@@ -386,9 +390,9 @@ export default {
     //修改用户信息并提交
     editUserInfo() {
       this.$refs.editFormRef.validate(async valid => {
-        console.log(valid)
+        // console.log(valid)
         if (!valid) return this.$message.error('修改用户信息失败！')
-        console.log(this.editForm)
+        // console.log(this.editForm)
         //发起修改用户信息的数据请求
         const { data: res } = await this.$http.put(
           'users/' + this.editForm.id,
@@ -397,7 +401,7 @@ export default {
             mobile: this.editForm.mobile
           }
         )
-        console.log(res)
+        // console.log(res)
         if (res.meta.status !== 200) {
           return this.$message.error('更新列表失败！')
         }
@@ -415,8 +419,6 @@ export default {
     */
     //根据Id删除对应的用户信息
     async removeUserById(id) {
-      console.log(this)
-      console.log(id)
       //弹框询问用户是否删除数据
       const confirmResult = await this.$confirm(
         '此操作将永久删除该用户, 是否继续?',
@@ -443,6 +445,7 @@ export default {
     },
     //展示分配角色的对话框
     async setRole(userInfo) {
+      // console.log(userInfo);
       this.userInfo = userInfo
       //在展示对话框之前，先获取所有角色的列表
       const { data: res } = await this.$http.get('roles')
@@ -464,10 +467,9 @@ export default {
           rid: this.selectedRoleId
         }
       )
-      this.getUserList()
       if (res.meta.status !== 200) return this.$message.error('分配角色失败！')
       this.$message.success('分配角色成功！')
-      
+      this.getUserList()
       this.setRoleDialogVisible = false
     },
     //监听分配角色对话框的关闭事件

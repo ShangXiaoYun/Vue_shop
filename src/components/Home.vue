@@ -13,7 +13,12 @@
       <!-- 侧边栏> -->
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="toggleCollapse">|||</div>
-        <!-- 侧边栏菜单区 -->
+        <!-- 
+          侧边栏菜单区 
+          default-active 当前激活菜单的 index
+          unique-opened  是否只保持一个子菜单的展开
+          router 激活导航时以 index 为 path 进行路由跳转
+        -->      
         <el-menu
           background-color="#333744"
           text-color="#fff"
@@ -95,7 +100,6 @@ export default {
     },
     //获取所有的菜单
     async getMenuList() {
-      // console.log(this) //VueComponent
       const { data: res } = await this.$http.get('menus')
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       console.log(res);

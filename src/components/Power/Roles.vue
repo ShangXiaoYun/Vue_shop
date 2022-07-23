@@ -27,7 +27,6 @@
           循环二级权限的children属性可以获得三级权限，三级权限children属性为空
           -->
           <template v-slot="scope">
-            {{scope.row}}
             <el-row
               :class="['bdbottom', i1 === 0 ? 'bdtop' : '', 'vcenter']"
               v-for="(item1, i1) in scope.row.children"
@@ -59,8 +58,8 @@
                   </el-col>
                   <el-col :span="18">
                     <!-- 设置closable属性可以定义一个标签是否可移除。
-                默认的标签移除时会附带渐变动画，如果不想使用，
-                可以设置disable-transitions属性，它接受一个Boolean，true 为关闭。 -->
+                    默认的标签移除时会附带渐变动画，如果不想使用，
+                    可以设置disable-transitions属性，它接受一个Boolean，true 为关闭。 -->
                     <el-tag
                       v-for="item3 in item2.children"
                       :key="item3.id"
@@ -84,7 +83,6 @@
         <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
         <el-table-column label="操作" width="300px">
           <template v-slot="scope">
-            <!-- {{ scope.row }} -->
             <el-button
               type="primary"
               icon="el-icon-edit"
@@ -118,9 +116,6 @@
       width="50%"
       @close="addDialogClosed"
     >
-      <!-- 主体区域 -->
-      <!-- Form 组件提供了表单验证的功能，只需要通过 rules 属性传入约定的验证规则，
-      并将 Form-Item 的 prop 属性设置为需校验的字段名即可。 -->
       <el-form
         ref="addRoleFormRef"
         :model="addRoleForm"
@@ -147,9 +142,6 @@
       width="50%"
       @close="editDialogClosed"
     >
-      <!-- 主体区域 -->
-      <!-- Form 组件提供了表单验证的功能，只需要通过 rules 属性传入约定的验证规则，
-      并将 Form-Item 的 prop 属性设置为需校验的字段名即可。 -->
       <el-form
         ref="editRoleFormRef"
         :model="editRoleForm"
@@ -261,8 +253,8 @@ export default {
       //所有权限的数据
       rightslist: [],
       //树形控件的属性绑定对象
-      //label属性定义页面显示的属性：这里是authName
-      //children属性定义父子嵌套的属性，这里是children
+      // label 属性定义页面显示的属性：这里是 authName
+      //children 属性定义父子嵌套的属性，这里是 children
       treeProps: {
         label: 'authName',
         children: 'children'
@@ -283,12 +275,12 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error('获取角色列表失败')
       this.rolelist = res.data
-      console.log(this.rolelist)
+      // console.log(this.rolelist)
     },
     //点击确定按钮，添加新角色
     addRole() {
       this.$refs.addRoleFormRef.validate(async valid => {
-        console.log(valid)
+        // console.log(valid)
         if (!valid) return
         //发起添加角色请求
         const { data: res } = await this.$http.post('roles', this.addRoleForm)
@@ -314,19 +306,19 @@ export default {
     //根据id查询对应的角色，并渲染到修改角色对话框的表单中
     async showEditDialog(id) {
       const { data: res } = await this.$http.get('roles/' + id)
-      console.log(res)
+      // console.log(res)
       if (res.meta.status !== 200)
         return this.$message.error('获取角色信息失败！')
       this.editRoleForm = res.data
-      console.log(this.editRoleForm)
+      // console.log(this.editRoleForm)
       this.editDialogVisible = true
     },
     //修改角色信息并提交
     editRoleInfo() {
       this.$refs.editRoleFormRef.validate(async valid => {
-        console.log(valid)
+        // console.log(valid)
         if (!valid) return this.$message.error('修改角色信息失败！')
-        console.log(this.editRoleForm)
+        // console.log(this.editRoleForm)
         const { data: res } = await this.$http.put(
           'roles/' + this.editRoleForm.roleId,
           {
@@ -334,7 +326,7 @@ export default {
             roleDesc: this.editRoleForm.roleDesc
           }
         )
-        console.log(res)
+        // console.log(res)
         if (res.meta.status !== 200)
           return this.$message.error('修改角色信息失败！')
         this.editDialogVisible = false
@@ -377,7 +369,6 @@ export default {
         }
       ).catch(err => err)
       if (confirmResult !== 'confirm') return this.$message.info('取消了删除！')
-      // console.log('确认了删除')
       //发起删除角色权限的业务请求
       const { data: res } = await this.$http.delete(
         `roles/${role.id}/rights/${rightId}`
@@ -385,11 +376,13 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error('删除角色权限失败！')
       //如果重新获取角色列表，那么每删除一次，列表都会重新渲染一次
-      // this.getRolesList()
       //响应数据说明：返回的data,是当前角色下最新的权限数据
-      console.log(res.data);
+      //这里充分体现了vue的响应式原理
+      // console.log(res.data);
       role.children = res.data
+      //针对删除三级或二级权限，高一级权限不清除，做额外处理
       res.data.forEach(async node => {
+        //针对二级权限为0，而一级权限仍存在的情况，把一级权限删除
         if(node.children.length == 0){
           //删除该节点
           const { data: res1 } = await this.$http.delete(
@@ -397,6 +390,7 @@ export default {
           )
           role.children = res1.data
         }else if(node.children.length != 1){
+          //针对三级权限为0 而二级权限不为0的情况， 删除二级权限
           node.children.forEach(async child =>{
             if(child.children.length == 0){
               const { data: res2 } = await this.$http.delete(
@@ -407,15 +401,16 @@ export default {
           })
         }
         else{
-            if(node.children[0].children.length == 0){
-              //删除该节点
-              const { data: res3 } = await this.$http.delete(
-                `roles/${role.id}/rights/${node.id}`
-              )
-              role.children = res3.data
-            }
+          //针对一级权限只有一个二级权限，当二级权限下没有三级权限时，一级、二级权限全部清除
+          if(node.children[0].children.length == 0){
+            //删除该节点
+            const { data: res3 } = await this.$http.delete(
+              `roles/${role.id}/rights/${node.id}`
+            )
+            role.children = res3.data
+          }
         }
-        console.log(role.children);
+        // console.log(role.children);
       })  
     },
     //展示分配权限的对话框
@@ -431,9 +426,10 @@ export default {
         return this.$message.error('获取权限数据失败！')
       //把获取到的权限数据保存到data 中
       this.rightslist = res.data
-      console.log(this.rightslist)
+      // console.log(this.rightslist)
       //递归获取三级节点的id
       this.getLeafKeys(role, this.defKeys)
+      // console.log(this.defKeys);
       this.$message.success('获取权限数据成功！')
       this.setRightDialogVisible = true
     },

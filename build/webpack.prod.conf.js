@@ -122,6 +122,10 @@ const webpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ])
+    // new HtmlWebpackPlugin().tap( args => {
+    //   args[0].isProd = true
+    //   return args
+    // })
   ],
   externals: {
     'vue': 'Vue',
@@ -143,13 +147,14 @@ if (config.build.productionGzip) {
     new CompressionWebpackPlugin({
       asset: '[path].gz[query]',
       algorithm: 'gzip',
+      //所有匹配该正则的资源都会被处理。默认值是全部资源。
       test: new RegExp(
         '\\.(' +
         config.build.productionGzipExtensions.join('|') +
         ')$'
       ),
-      threshold: 10240,
-      minRatio: 0.8
+      threshold: 10240, //只有大小大于该值的资源会被处理。单位是 bytes。默认值是 0。
+      minRatio: 0.8  //只有压缩率小于这个值的资源才会被处理。默认值是 0.8。
     })
   )
 }

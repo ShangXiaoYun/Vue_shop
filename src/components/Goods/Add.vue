@@ -20,7 +20,7 @@
 
       <!--
          步骤条区域
-         设置active属性，接受一个Number，表明步骤的 index，从 0 开始。
+         设置active属性，接受一个 Number，表明步骤的 index，从 0 开始。
          需要定宽的步骤条时，设置space属性即可，它接受Number，单位为px，如果不设置，则为自适应。
          设置finish-status属性可以改变已经完成的步骤的状态。
        -->
@@ -140,7 +140,7 @@
               on-remove 文件列表移除文件时的钩子   function(file, fileList)  file：将要被移除的图片信息
               list-type 文件列表的类型 
 
-              上传图片没有适用axios发起ajax请求，因此即使显示图片，也是无效的，返回“无效token”
+              上传图片没有使用axios发起ajax请求，因此即使显示图片，也是无效的，返回“无效token”
              headers  设置上传的请求头部，在里面自定义Authorization
              在上传每一张图片的时候，都手动为它指定一个headers请求头，在请求头中包含一个字段属性：Authorization，
              它的值就是保存的token值，这样就为每一次上传图片的Ajax的请求提供了一个token验证
@@ -266,17 +266,10 @@ export default {
       this.catelist = res.data
       console.log(this.catelist)
     },
-    //级联选择器选中项变化，会触发这个函数
-    handleChange() {
-      console.log(this.addForm.goods_cat)
-      if (this.addForm.goods_cat.length !== 3) {
-        this.addForm.goods_cat = []
-      }
-    },
     beforeTabLeave(activeName, oldActiveName) {
       // console.log('即将离开的标签页的名字是：' + oldActiveName)
       // console.log('即将进入的标签页的名字是：' + activeName)
-      // return false //只要return false就会组织标签页切换
+      // return false //只要return false就会阻止标签页切换
       if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3)
         return false
     },
@@ -294,12 +287,13 @@ export default {
         )
         if (res.meta.status !== 200)
           return this.$message.error('获取动态参数失败！')
-        console.log(res)
+        // console.log(res)
         //字符串转数组  
         res.data.forEach(item => {
           item.attr_vals =
             item.attr_vals.length === 0 ? [] : item.attr_vals.split(' ')
         })
+        // console.log(res.data);
         this.manyTableData = res.data
       } else if (this.activeIndex === '2') {
         const { data: res } = await this.$http.get(
@@ -310,14 +304,15 @@ export default {
         )
         if (res.meta.status !== 200)
           return this.$message.error('获取静态属性失败！')
-        console.log(res.data)
+        // console.log(res.data)
         this.onlyTableData = res.data
       }
     },
     //处理图片预览效果
     handlePreview(file) {
       console.log(file)
-      this.previewPath = file.response.data.url
+      // 替换成上传给后台的图片
+      this.previewPath = file.response.data.url.replace('http://120.78.137.246', 'https://lianghj.top')
       this.previewVisible = true
     },
     //处理移除图片的操作
@@ -356,7 +351,7 @@ export default {
         //处理动态参数
         this.manyTableData.forEach(item => {
           const newInfo = {
-            add_price: form.addPrice + 0,
+            // add_price: form.addPrice + 0,
             attr_id: item.attr_id,
             attr_value: item.attr_vals.join(' ')
           }
@@ -365,7 +360,7 @@ export default {
         //处理静态属性
         this.onlyTableData.forEach(item => {
           const newInfo = {
-            add_price: form.addPrice + 0,
+            // add_price: form.addPrice + 0,
             attr_id: item.attr_id,
             attr_value: item.attr_vals
           }
@@ -373,11 +368,20 @@ export default {
         })
         console.log(form)
         //与后端接口不一致的地方：是否为热销品无法修改
-        const { data: res } = await this.$http.post('goods', form)
-        console.log(res)
+        const { data: res } = await this.$http.post('goods', {
+          goods_name: form.goods_name,
+          goods_cat: form.goods_cat,
+          goods_price: form.goods_price + 0,
+          goods_number: form.goods_number + 0,
+          goods_weight: form.goods_weight + 0,
+          goods_introduce: form.goods_introduce,
+          // pics: form.pics,
+          attrs: form.attrs
+        })
+        // console.log(res)
         if (res.meta.status !== 201)
           return this.$message.error('添加商品失败！')
-        this.$message.success('添加商品成功')
+        this.$message.success('添加商品成功！')
         //编程式导航跳转到商品列表
         this.$router.push('/goods')
       })

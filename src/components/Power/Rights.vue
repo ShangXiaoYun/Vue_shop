@@ -9,7 +9,14 @@
 
     <!-- 卡片视图 -->
     <el-card>
-      <el-table :data="rightslist" border stripe>
+      <el-table 
+        :data="rightslist" 
+        border 
+        stripe
+        v-el-table-infinite-scroll="load"
+        infinite-scroll-delay="500"
+        infinite-scroll-distance="50"
+      >
           <el-table-column type="index" label="#"></el-table-column>
           <el-table-column prop="authName" label="权限名称"></el-table-column>
           <el-table-column prop="path" label="路径"></el-table-column>
@@ -25,6 +32,18 @@
             </template>
           </el-table-column>
       </el-table>
+      <el-alert v-if="isflag"
+                title="正在努力加载中..."
+                type="success"
+                center
+                show-icon>
+        </el-alert>
+        <el-alert v-if="isMore"
+                title="没有更多啦！"
+                type="warning"
+                center
+                show-icon>
+        </el-alert>
     </el-card>
   </div>
 </template>
@@ -34,7 +53,9 @@ export default {
   data() {
     return {
       //权限列表
-      rightslist: []
+      rightslist: [],
+      isflag: true,
+      isMore: false,
     }
   },
   created() {
@@ -49,7 +70,11 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error('获取权限列表失败！')
       this.rightslist = res.data
-      console.log(this.rightslist)
+      // console.log(this.rightslist)
+    },
+    load(){
+      this.isMore = true;
+      this.isflag = false;
     }
   }
 }

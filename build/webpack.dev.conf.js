@@ -62,6 +62,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         inject: true
       }
     ),
+    // new HtmlWebpackPlugin().tap( args => {
+    //   args[0].isProd = false
+    //   return args
+    // }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -74,13 +78,13 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   externals: {
     'vue': 'Vue',
     // 'vue-router': 'VueRouter',
-    'axios': 'axios',
+    // 'axios': 'axios',
     'vue-lazyload':'VueLazyload',
     lodash:'_',
-    echarts:'echarts',
-    nprogress:'NProgress',
-    'vue-quill-editor':'VueQuillEditor',
-    'element-ui': 'ELEMENT'
+    // echarts:'echarts',
+    // nprogress:'NProgress',
+    // 'vue-quill-editor':'VueQuillEditor',
+    // 'element-ui': 'ELEMENT'
   }
 })
 

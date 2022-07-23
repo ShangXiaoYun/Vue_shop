@@ -49,7 +49,7 @@
             <!-- 展开行-->
             <el-table-column type="expand">
               <template slot-scope="scope">
-                <!-- {{scope.row}} -->
+                <!-- <pre>{{scope.row}}</pre> -->
                 <!-- 循环渲染Tag标签 -->
                 <el-tag
                   v-for="(item, i) in scope.row.attr_vals"
@@ -61,7 +61,7 @@
                 <!-- 
                   输入的文本框 
                     blur：在Input失去焦点时触发
-                    focus:在Input获取焦点时触发 
+                    focus: 在Input获取焦点时触发 
                 -->
                 <el-input
                   class="input-new-tag"
@@ -91,7 +91,6 @@
             ></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <!-- {{ scope.row }} -->
                 <el-button
                   size="mini"
                   type="primary"
@@ -422,7 +421,6 @@ export default {
     },
     //文本框失去焦点，或摁下 Enter 键都会触发
     handleInputConfirm(row) {
-      console.log('ok')
       //trim()方法去除空格
       if (row.inputValue.trim().length === 0) {
         row.inputValue = ''
@@ -457,7 +455,6 @@ export default {
       //让文本框自动获得焦点
       //$nextTick 方法的作用，就是当页面上元素被重新渲染之后，才会指定回调函数中的代码
       //第一个refs拿到el-input，第二个refs从el-input身上拿到原生DOM节点
-      //focus是Input组件的方法：使input获取焦点
       this.$nextTick(_ => {
         console.log(this);
         this.$refs.saveTagInput.$refs.input.focus()

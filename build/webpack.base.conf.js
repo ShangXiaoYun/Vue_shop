@@ -65,7 +65,11 @@ module.exports = {
           {
             loader: 'image-webpack-loader',
             options: {
-                bypassOnDebug: true
+                disable: process.env.NODE_ENV === 'development', // 开发环境下禁止压缩
+                // bypassOnDebug: true,
+                gifsicle: {
+                  interlaced: false
+                }
             }
           }
         ]

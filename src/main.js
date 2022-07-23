@@ -4,9 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 // 导入组件库
-import ElementUI from 'element-ui'
+// import ElementUI from 'element-ui'
+// import SophieUI from 'sophie-ui'
+// import MeowsUI from 'meows-ui'
 // 导入组件相关样式
-import 'element-ui/lib/theme-chalk/index.css'
+// import 'element-ui/lib/theme-chalk/index.css'
+// import 'sophie-ui/lib/sophie-ui.css'
+
 // 导入全局样式表
 import './assets/css/global.css'
 // 导入字体图标
@@ -16,15 +20,18 @@ import TreeTable from 'vue-table-with-tree-grid'
 //导入富文本编辑器
 import VueQuillEditor from 'vue-quill-editor'
 //导入富文本编辑器对应的样式
-import 'quill/dist/quill.core.css' // import styles
-import 'quill/dist/quill.snow.css' // for snow theme
-import 'quill/dist/quill.bubble.css' // for bubble theme
+// import 'quill/dist/quill.core.css' // import styles
+// import 'quill/dist/quill.snow.css' // for snow theme
+// import 'quill/dist/quill.bubble.css' // for bubble theme
 
 //导入 NProgress 包对应的JS和 css
 import NProgress from 'nprogress'
 // import 'nprogress/nprogress.css'
 
 import VueLazyLoad from 'vue-lazyload'
+
+import elTableInfiniteScroll from 'el-table-infinite-scroll';
+Vue.use(elTableInfiniteScroll);
 
 import axios from 'axios'
 //配置请求根路径
@@ -49,9 +56,9 @@ Vue.prototype.$http = axios
 // Vue.prototype.$echarts = echarts
 
 // 配置 Vue 插件
-Vue.use(ElementUI)
+// Vue.use(ElementUI)
+// Vue.use(SophieUI)
 Vue.config.productionTip = false
-// Vue.prototype.$axios = axios
 
 // Vue.use(TreeTable)
 //注册为全局可用组件(手动注册：后面是注册的插件，前面是名称)

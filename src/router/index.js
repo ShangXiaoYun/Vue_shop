@@ -25,9 +25,9 @@ const router = new Router({
     { path: '/', redirect: '/login' },
     { path: '/login', component: Login },
     {
-      //子路由规则，welcome在home页面下，因此子路由规则放入children数组中
+      //子路由规则，welcome 在 home 页面下，因此子路由规则放入 children 数组中
       path: '/home', component: Home,
-      //重定向形式，只要路由访问了home地址，就重定向到welcome子路由规则
+      //重定向形式，只要路由访问了 home 地址，就重定向到 welcome 子路由规则
       redirect: '/welcome',
       children: [
         { path: '/welcome', component: Welcome },
